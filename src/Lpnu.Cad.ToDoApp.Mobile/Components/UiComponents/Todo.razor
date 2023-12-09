@@ -1,0 +1,27 @@
+﻿@using Lpnu.Cad.ToDoApp.Mobile.Data
+@using Lpnu.Cad.ToDoApp.Shared.DataTransferObjects
+@inject TodoRepository _repository
+
+<div class="card m-3">
+    <h5 class="card-header">@TodoItem.Title</h5>
+    @if (!TodoItem.IsCompleted)
+    {
+        <button @onclick="OnCompleteClick" class="btn btn-success m-2">
+            <span class="p-2">Позначити виконаним</span>
+        </button>
+    } else
+    {
+        <span class="p-2">Виконано</span>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public TodoDto? TodoItem { get; set; }
+
+    async Task OnCompleteClick()
+    {
+        TodoItem.IsCompleted = true;
+        await _repository.Update(TodoItem);
+    }
+}

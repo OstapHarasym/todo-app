@@ -1,0 +1,27 @@
+﻿@page "/"
+@inject TodoRepository _repository
+@using Lpnu.Cad.ToDoApp.Mobile.Data
+@using Lpnu.Cad.ToDoApp.Shared.DataTransferObjects
+@using Lpnu.Cad.ToDoApp.Mobile.Components.UiComponents
+
+<div class="m-3">
+    <NavLink class="btn btn-primary w-100" href="create-todo">
+        Додати завдання
+    </NavLink>
+</div>
+
+<hr/>
+
+@foreach(var todo in Todos)
+{
+    <Todo TodoItem=@todo />
+}
+
+@code {
+    private IEnumerable<TodoDto> Todos = new List<TodoDto>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        Todos = (await _repository.Get()).OrderBy(todo => todo.IsCompleted);
+    }
+}

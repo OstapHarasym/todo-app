@@ -1,0 +1,50 @@
+﻿@page "/data-import"
+@using Lpnu.Cad.ToDoApp.Mobile.Data
+@using Lpnu.Cad.ToDoApp.Shared.DataTransferObjects
+@using Newtonsoft.Json
+@using Newtonsoft.Json.Linq
+@using System.Text
+@inject TodoRepository _repository
+
+<InputFile OnChange="@LoadFile" />
+
+@code {
+    private async Task LoadFile(InputFileChangeEventArgs e)
+    {
+        try
+        {
+            using var stream = e.File.OpenReadStream();
+            using var streamReader = new StreamReader(stream, Encoding.UTF8);
+
+            var text = await streamReader.ReadToEndAsync();
+            var jObject = JObject.Parse(text);
+
+            var tasks = GetTasks(jObject);
+
+            var todos = tasks.Select(jobj => new TodoDto(jobj["title"].ToString(), jobj["status"].ToString() == "completed"));
+            await _repository.Add(todos);
+        }
+        catch(Exception ex)
+        {
+            
+        }
+    }
+
+    private List<JToken> GetTasks(JObject jsonObject)
+    {
+        List<JToken> tasks = new List<JToken>();
+
+        // Traverse the JSON hierarchy to find objects with kind "tasks#task"
+        foreach (JToken item in jsonObject["items"])
+        {
+            JToken taskList = item["items"];
+
+            if (taskList != null && taskList.Type == JTokenType.Array)
+            {
+                tasks.AddRange(taskList.Where(t => t["kind"]?.ToString() == "tasks#task"));
+            }
+        }
+
+        return tasks;
+    }
+}

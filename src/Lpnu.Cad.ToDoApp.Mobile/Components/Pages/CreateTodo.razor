@@ -1,0 +1,28 @@
+﻿@page "/create-todo"
+@inject TodoRepository _repository
+@inject NavigationManager NavigationManager
+@using Lpnu.Cad.ToDoApp.Mobile.Data
+@using Lpnu.Cad.ToDoApp.Shared.DataTransferObjects
+
+<div class="container">
+    <h3>Створіть завдання</h3>
+</div>
+
+<EditForm Model="@Todo" OnSubmit="OnFormSubmit">
+    <div class="m-3">
+        <label class="h6">Заголовок:</label>
+        <InputText class="w-100" @bind-Value="@Todo.Title" />
+        <button type="submit" class="btn btn-primary w-100 mt-4">Зберегти</button>
+    </div>
+</EditForm>
+
+@code {
+    TodoDto Todo = new();
+
+    async Task OnFormSubmit()
+    {
+        Todo.Id = Guid.NewGuid();
+        await _repository.Add(Todo);
+        NavigationManager.NavigateTo("/");
+    }
+}
